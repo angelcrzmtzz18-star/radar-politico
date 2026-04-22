@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADAR · Inteligencia Político-Digital</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1B2A;
+    --navy2: #152637;
+    --blue: #1B4F8A;
+    --accent: #00C2D4;
+    --gold: #F4C430;
+    --danger: #E63946;
+    --success: #2EC4B6;
+    --neutral: #8FA3B1;
+    --white: #FFFFFF;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(0,194,212,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,194,212,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,194,212,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+    position: sticky; top: 0;
+    background: rgba(13,27,42,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 6px; }
+  .logo span { color: var(--white); opacity: 0.3; }
+  .header-meta { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--neutral); text-align: right; letter-spacing: 1px; }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; margin-right: 5px; vertical-align: middle; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* SEARCH SCREEN */
+  #searchScreen { text-align: center; padding: 80px 24px 60px; }
+  .hero-logo { font-family: 'Space Mono', monospace; font-size: 48px; font-weight: 700; color: var(--accent); letter-spacing: 16px; margin-bottom: 8px; }
+  .hero-sub { font-family: 'Space Mono', monospace; font-size: 9px; color: rgba(143,163,177,0.6); letter-spacing: 3px; margin-bottom: 48px; }
+  .search-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--accent); letter-spacing: 3px; margin-bottom: 14px; }
+  .search-row { display: flex; gap: 10px; max-width: 520px; margin: 0 auto 14px; }
+  .search-input {
+    flex: 1; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(0,194,212,0.25); border-radius: 4px;
+    padding: 14px 18px; color: #fff; font-size: 15px;
+    font-family: 'DM Sans', sans-serif; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: rgba(143,163,177,0.4); }
+  .search-input:focus { border-color: rgba(0,194,212,0.6); }
+  .search-btn {
+    background: var(--accent); color: var(--navy);
+    border: none; border-radius: 4px; padding: 14px 22px;
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    font-weight: 700; letter-spacing: 1px; cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .search-btn:hover { opacity: 0.85; }
+  .search-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .chip {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    padding: 5px 12px; border-radius: 2px;
+    background: rgba(0,194,212,0.07); color: rgba(0,194,212,0.7);
+    border: 1px solid rgba(0,194,212,0.2); cursor: pointer;
+    letter-spacing: 0.5px; transition: background 0.15s;
+  }
+  .chip:hover { background: rgba(0,194,212,0.14); }
+
+  /* LOADING */
+  #loadingScreen { display: none; text-align: center; padding: 80px 24px; }
+  .load-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+  .load-msg { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--neutral); letter-spacing: 2px; margin-bottom: 32px; }
+  .load-bar { width: 280px; height: 2px; background: rgba(0,194,212,0.12); border-radius: 2px; margin: 0 auto 24px; overflow: hidden; }
+  .load-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 2px; transition: width 0.5s ease; }
+  .load-steps { display: flex; flex-direction: column; gap: 8px; }
+  .step { font-family: 'Space Mono', monospace; font-size: 9px; color: #4A5568; letter-spacing: 1px; transition: color 0.3s; }
+  .step.done { color: var(--success); }
+  .step.active { color: var(--accent); }
+
+  /* DASHBOARD */
+  #dashScreen { display: none; padding: 36px 0; }
+  .dash-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .dash-name { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; line-height: 1.05; margin-bottom: 6px; }
+  .dash-name span { color: var(--accent); }
+  .dash-role { font-size: 13px; color: var(--neutral); font-weight: 300; }
+  .back-btn {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    padding: 8px 16px; border-radius: 2px;
+    background: rgba(0,194,212,0.07); color: var(--accent);
+    border: 1px solid rgba(0,194,212,0.2); cursor: pointer;
+    letter-spacing: 1px; white-space: nowrap; transition: background 0.15s;
+  }
+  .back-btn:hover { background: rgba(0,194,212,0.14); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 28px; }
+  .tab-btn {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    padding: 7px 16px; border-radius: 2px;
+    border: 1px solid rgba(143,163,177,0.2);
+    background: transparent; color: var(--neutral);
+    cursor: pointer; letter-spacing: 1px; transition: all 0.15s;
+  }
+  .tab-btn.active { background: rgba(0,194,212,0.1); color: var(--accent); border-color: rgba(0,194,212,0.3); }
+  .tab-btn:hover:not(.active) { color: #fff; border-color: rgba(143,163,177,0.4); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 18px 16px; position: relative; overflow: hidden; }
+  .kpi-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; }
+  .kpi-card.acc::before { background: var(--accent); }
+  .kpi-card.suc::before { background: var(--success); }
+  .kpi-card.dan::before { background: var(--danger); }
+  .kpi-card.gld::before { background: var(--gold); }
+  .kpi-lbl { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--neutral); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .kpi-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .kpi-card.acc .kpi-val { color: var(--accent); }
+  .kpi-card.suc .kpi-val { color: var(--success); }
+  .kpi-card.dan .kpi-val { color: var(--danger); }
+  .kpi-card.gld .kpi-val { color: var(--gold); }
+  .kpi-note { font-size: 10px; color: var(--neutral); }
+
+  /* SECTION TITLE */
+  .sec-title { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .sec-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+  /* NARRATIVE */
+  .nar-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .nar-item { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; display: flex; gap: 12px; }
+  .nar-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .nar-dot.pos { background: var(--success); }
+  .nar-dot.neg { background: var(--danger); }
+  .nar-dot.neu { background: var(--gold); }
+  .nar-title { font-size: 13px; color: #fff; margin-bottom: 4px; font-weight: 500; }
+  .nar-desc { font-size: 11px; color: var(--neutral); line-height: 1.6; }
+
+  /* CHARTS */
+  .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 18px; margin-bottom: 14px; }
+  .chart-lbl { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--neutral); letter-spacing: 1.5px; margin-bottom: 14px; }
+
+  /* RECS */
+  .rec-list { display: flex; flex-direction: column; gap: 12px; }
+  .rec-item { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 16px; }
+  .rec-badge { display: inline-block; font-family: 'Space Mono', monospace; font-size: 8px; padding: 3px 10px; border-radius: 2px; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .rec-badge.est { background: rgba(46,196,182,0.1); color: var(--success); border: 1px solid rgba(46,196,182,0.3); }
+  .rec-badge.dig { background: rgba(0,194,212,0.1); color: var(--accent); border: 1px solid rgba(0,194,212,0.3); }
+  .rec-badge.nar { background: rgba(244,196,48,0.1); color: var(--gold); border: 1px solid rgba(244,196,48,0.3); }
+  .rec-title { font-size: 13px; color: #fff; margin-bottom: 4px; font-weight: 500; }
+  .rec-desc { font-size: 11px; color: var(--neutral); line-height: 1.6; }
+
+  /* DICTAMEN */
+  .dictamen-box { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 24px; }
+  .dictamen-label { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--accent); letter-spacing: 2px; margin-bottom: 12px; }
+  .dictamen-text { font-size: 13px; color: var(--neutral); line-height: 1.8; }
+
+  /* VERDICT */
+  .verdict-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .verdict-card { border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .verdict-header { padding: 9px 14px; font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 1px; font-weight: 700; }
+  .verdict-body { padding: 12px 14px; font-size: 11px; color: var(--neutral); background: var(--card); line-height: 1.6; }
+
+  /* ERROR */
+  #errorScreen { display: none; text-align: center; padding: 80px 24px; }
+  .error-title { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--danger); letter-spacing: 2px; margin-bottom: 10px; }
+  .error-msg { font-size: 12px; color: var(--neutral); margin-bottom: 20px; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 20px 0; margin-top: 60px; }
+  .footer-text { font-family: 'Space Mono', monospace; font-size: 8px; color: rgba(143,163,177,0.4); letter-spacing: 2px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="wrap">
+    <div class="header-inner">
+      <div class="logo">RADAR<span>·</span></div>
+      <div class="header-meta">
+        <span class="dot"></span>SISTEMA ACTIVO<br>
+        INTELIGENCIA POLÍTICO-DIGITAL
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- SEARCH -->
+  <div id="searchScreen">
+    <div class="hero-logo">RADAR</div>
+    <div class="hero-sub">SISTEMA DE INTELIGENCIA POLÍTICO-DIGITAL · MÉXICO 2026</div>
+    <div class="search-label">// INGRESA EL NOMBRE DE UN POLÍTICO PARA GENERAR SU ANÁLISIS</div>
+    <div class="search-row">
+      <input class="search-input" id="nameInput" type="text" placeholder="ej. Claudia Sheinbaum, Xóchitl Gálvez..." />
+      <button class="search-btn" id="searchBtn" onclick="startSearch()">ANALIZAR</button>
+    </div>
+    <div class="chips">
+      <span class="chip" onclick="quickSearch('Claudia Sheinbaum')">Claudia Sheinbaum</span>
+      <span class="chip" onclick="quickSearch('Xóchitl Gálvez')">Xóchitl Gálvez</span>
+      <span class="chip" onclick="quickSearch('Ricardo Monreal')">Ricardo Monreal</span>
+      <span class="chip" onclick="quickSearch('Santiago Taboada')">Santiago Taboada</span>
+      <span class="chip" onclick="quickSearch('Mario Delgado')">Mario Delgado</span>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingScreen">
+    <div class="load-name" id="loadName"></div>
+    <div class="load-msg" id="loadMsg">INICIANDO ANÁLISIS...</div>
+    <div class="load-bar"><div class="load-fill" id="loadFill"></div></div>
+    <div class="load-steps">
+      <div class="step" id="s1">[ ] Buscando información pública y reciente</div>
+      <div class="step" id="s2">[ ] Analizando narrativas en redes y medios</div>
+      <div class="step" id="s3">[ ] Calculando indicadores de posicionamiento</div>
+      <div class="step" id="s4">[ ] Generando dictamen estratégico</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashScreen">
+    <div class="dash-header">
+      <div>
+        <div class="dash-name" id="dashName"></div>
+        <div class="dash-role" id="dashRole"></div>
+      </div>
+      <button class="back-btn" onclick="reset()">← NUEVA BÚSQUEDA</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('panorama',this)">PANORAMA</button>
+      <button class="tab-btn" onclick="showTab('narrativas',this)">NARRATIVAS</button>
+      <button class="tab-btn" onclick="showTab('redes',this)">REDES SOCIALES</button>
+      <button class="tab-btn" onclick="showTab('recomendaciones',this)">RECOMENDACIONES</button>
+      <button class="tab-btn" onclick="showTab('dictamen',this)">DICTAMEN</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-panorama">
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="sec-title">POSICIONAMIENTO NARRATIVO</div>
+      <div class="nar-list" id="posNar"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-narrativas">
+      <div class="sec-title">NARRATIVAS POSITIVAS</div>
+      <div class="nar-list" id="narPos"></div>
+      <div class="sec-title">NARRATIVAS NEGATIVAS / RIESGO</div>
+      <div class="nar-list" id="narNeg"></div>
+      <div class="chart-box">
+        <div class="chart-lbl">DISTRIBUCIÓN TEMÁTICA EN MEDIOS Y REDES (%)</div>
+        <canvas id="chartTopics" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-redes">
+      <div class="kpi-grid" id="kpiRedes"></div>
+      <div class="chart-box">
+        <div class="chart-lbl">CONVERSACIÓN DIGITAL POR PLATAFORMA</div>
+        <canvas id="chartPlat" height="200"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-lbl">SENTIMIENTO DIGITAL</div>
+        <canvas id="chartSent" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-recomendaciones">
+      <div class="sec-title">ACCIONES ESTRATÉGICAS PRIORITARIAS</div>
+      <div class="rec-list" id="recList"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-dictamen">
+      <div class="sec-title">DICTAMEN EJECUTIVO</div>
+      <div class="dictamen-box">
+        <div class="dictamen-label">// DICTAMEN RADAR · ABRIL 2026</div>
+        <p class="dictamen-text" id="dictamenText"></p>
+      </div>
+      <div class="verdict-grid" id="verdictGrid"></div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="errorScreen">
+    <div class="error-title">ERROR EN EL ANÁLISIS</div>
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="back-btn" onclick="reset()">← INTENTAR DE NUEVO</button>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-text">RADAR · SISTEMA DE INTELIGENCIA POLÍTICO-DIGITAL · MÉXICO · 2026</div>
+  </div>
+</footer>
+
+<script>
+let charts = {};
+
+function quickSearch(n) {
+  document.getElementById('nameInput').value = n;
+  startSearch();
+}
+
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startSearch();
+});
+
+function setStep(id, state) {
+  const labels = {
+    s1: 'Buscando información pública y reciente',
+    s2: 'Analizando narrativas en redes y medios',
+    s3: 'Calculando indicadores de posicionamiento',
+    s4: 'Generando dictamen estratégico'
+  };
+  const el = document.getElementById(id);
+  const pre = state === 'done' ? '[✓]' : state === 'active' ? '[→]' : '[ ]';
+  el.textContent = pre + ' ' + labels[id];
+  el.className = 'step ' + (state || '');
+}
+
+async function startSearch() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) return;
+
+  show('loadingScreen');
+  document.getElementById('loadName').textContent = name.toUpperCase();
+  document.getElementById('loadFill').style.width = '5%';
+  document.getElementById('loadMsg').textContent = 'INICIANDO ANÁLISIS...';
+  ['s1','s2','s3','s4'].forEach(s => setStep(s, ''));
+  setStep('s1','active');
+
+  const iv = setInterval(() => {
+    const fill = document.getElementById('loadFill');
+    const cur = parseFloat(fill.style.width) || 0;
+    if (cur < 85) {
+      const next = Math.min(cur + Math.random() * 4 + 1, 85);
+      fill.style.width = next + '%';
+      if (next > 20) { setStep('s1','done'); setStep('s2','active'); document.getElementById('loadMsg').textContent = 'ANALIZANDO NARRATIVAS...'; }
+      if (next > 50) { setStep('s2','done'); setStep('s3','active'); document.getElementById('loadMsg').textContent = 'CALCULANDO INDICADORES...'; }
+      if (next > 75) { setStep('s3','done'); setStep('s4','active'); document.getElementById('loadMsg').textContent = 'GENERANDO DICTAMEN...'; }
+    }
+  }, 600);
+
+  try {
+    const resp = await fetch('/api/analizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre: name })
+    });
+
+    clearInterval(iv);
+    if (!resp.ok) throw new Error('Error del servidor: ' + resp.status);
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    setStep('s4','done');
+    document.getElementById('loadFill').style.width = '100%';
+    document.getElementById('loadMsg').textContent = 'ANÁLISIS COMPLETO';
+
+    await new Promise(r => setTimeout(r, 700));
+    renderDash(data);
+
+  } catch(err) {
+    clearInterval(iv);
+    document.getElementById('errorMsg').textContent = err.message;
+    show('errorScreen');
+  }
+}
+
+function renderDash(d) {
+  show('dashScreen');
+
+  const words = d.nombre.split(' ');
+  const last = words.pop();
+  document.getElementById('dashName').innerHTML = words.join(' ') + ' <span>' + last + '</span>';
+  document.getElementById('dashRole').textContent = d.cargo;
+
+  // KPIs
+  document.getElementById('kpiGrid').innerHTML = d.kpis.map(k =>
+    `<div class="kpi-card ${k.tipo}"><div class="kpi-lbl">${k.label}</div><div class="kpi-val">${k.valor}</div><div class="kpi-note">${k.nota}</div></div>`
+  ).join('');
+
+  // Posicionamiento
+  document.getElementById('posNar').innerHTML = d.posicionamiento.map(n =>
+    `<div class="nar-item"><div class="nar-dot ${n.tipo}"></div><div><div class="nar-title">${n.titulo}</div><div class="nar-desc">${n.descripcion}</div></div></div>`
+  ).join('');
+
+  // Narrativas
+  document.getElementById('narPos').innerHTML = d.narrativas_positivas.map(n =>
+    `<div class="nar-item"><div class="nar-dot pos"></div><div><div class="nar-title">${n.titulo}</div><div class="nar-desc">${n.descripcion}</div></div></div>`
+  ).join('');
+  document.getElementById('narNeg').innerHTML = d.narrativas_negativas.map(n =>
+    `<div class="nar-item"><div class="nar-dot neg"></div><div><div class="nar-title">${n.titulo}</div><div class="nar-desc">${n.descripcion}</div></div></div>`
+  ).join('');
+
+  // Redes KPIs
+  document.getElementById('kpiRedes').innerHTML = d.redes_kpis.map(k =>
+    `<div class="kpi-card ${k.tipo}"><div class="kpi-lbl">${k.label}</div><div class="kpi-val">${k.valor}</div><div class="kpi-note">${k.nota}</div></div>`
+  ).join('');
+
+  // Recomendaciones
+  const rl = {est:'ESTRATÉGICO', dig:'DIGITAL', nar:'NARRATIVA'};
+  document.getElementById('recList').innerHTML = d.recomendaciones.map(r =>
+    `<div class="rec-item"><span class="rec-badge ${r.tipo}">${rl[r.tipo]||r.tipo.toUpperCase()}</span><div class="rec-title">${r.titulo}</div><div class="rec-desc">${r.descripcion}</div></div>`
+  ).join('');
+
+  // Dictamen
+  document.getElementById('dictamenText').textContent = d.dictamen;
+
+  // Veredictos
+  const vc = {
+    suc:{bg:'rgba(46,196,182,0.15)',c:'#2EC4B6'},
+    dan:{bg:'rgba(230,57,70,0.15)',c:'#E63946'},
+    acc:{bg:'rgba(0,194,212,0.1)',c:'#00C2D4'},
+    gld:{bg:'rgba(244,196,48,0.12)',c:'#F4C430'},
+    neu:{bg:'rgba(27,79,138,0.3)',c:'#7eb8f7'},
+    ris:{bg:'rgba(170,0,0,0.2)',c:'#ff7070'}
+  };
+  document.getElementById('verdictGrid').innerHTML = d.veredictos.map(v => {
+    const s = vc[v.tipo]||vc.neu;
+    return `<div class="verdict-card"><div class="verdict-header" style="background:${s.bg};color:${s.c}">${v.titulo}</div><div class="verdict-body">${v.cuerpo}</div></div>`;
+  }).join('');
+
+  setTimeout(() => renderCharts(d), 150);
+
+  // Reset tabs
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+}
+
+function renderCharts(d) {
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  Chart.defaults.color = '#8FA3B1';
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  const C = ['#2EC4B6','#00C2D4','#F4C430','#E63946','#1B4F8A','#8FA3B1'];
+
+  charts.topics = new Chart(document.getElementById('chartTopics'), {
+    type:'bar',
+    data:{ labels: d.temas.map(t=>t.tema), datasets:[{data:d.temas.map(t=>t.pct),backgroundColor:C,borderRadius:2,borderWidth:0}] },
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{callback:v=>v+'%'}}, y:{grid:{display:false}} } }
+  });
+
+  charts.plat = new Chart(document.getElementById('chartPlat'), {
+    type:'bar',
+    data:{ labels:d.plataformas.map(p=>p.nombre), datasets:[{data:d.plataformas.map(p=>p.pct),backgroundColor:C,borderRadius:2,borderWidth:0}] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{callback:v=>v+'%'}}, x:{grid:{display:false}} } }
+  });
+
+  charts.sent = new Chart(document.getElementById('chartSent'), {
+    type:'doughnut',
+    data:{ labels:d.sentimiento.map(s=>s.label), datasets:[{data:d.sentimiento.map(s=>s.pct),backgroundColor:['#2EC4B6','#8FA3B1','#E63946','#F4C430'],borderWidth:0,hoverOffset:8}] },
+    options:{ responsive:true, cutout:'60%', plugins:{ legend:{position:'bottom',labels:{padding:14,font:{size:11}}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}%`}} } }
+  });
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function show(id) {
+  ['searchScreen','loadingScreen','dashScreen','errorScreen'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function reset() {
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  document.getElementById('nameInput').value = '';
+  show('searchScreen');
+}
+</script>
+</body>
+</html>
