@@ -85,18 +85,17 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
 Basa tus respuestas en información real y verificable sobre "${nombre}". Si es un político mexicano conocido, usa datos actuales de 2024-2026. Los porcentajes deben ser realistas y coherentes entre sí.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'web-search-2025-03-05'
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://radar-politico.vercel.app',
+        'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'google/gemini-2.0-flash-001',
         max_tokens: 3000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -107,8 +106,7 @@ Basa tus respuestas en información real y verificable sobre "${nombre}". Si es 
     }
 
     const data = await response.json();
-    const textBlocks = data.content.filter(b => b.type === 'text');
-    const rawText = textBlocks.map(b => b.text).join('');
+    const rawText = data.choices?.[0]?.message?.content || '';
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) return res.status(500).json({ error: 'No se pudo parsear la respuesta' });
