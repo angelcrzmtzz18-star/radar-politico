@@ -108,7 +108,7 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
         'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
+        model: 'anthropic/claude-haiku-3-5',
         max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
