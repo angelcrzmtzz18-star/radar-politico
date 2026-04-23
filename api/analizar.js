@@ -6,22 +6,29 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  const { nombre } = req.body;
+  const { nombre, fecha } = req.body;
   if (!nombre) return res.status(400).json({ error: 'Falta el nombre' });
 
-  const prompt = `Eres un analista político-digital experto en México. Genera un perfil RADAR completo y detallado del político: "${nombre}".
+  const fechaCtx = fecha || 'abril 2026';
 
-Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, sin texto adicional):
+  const prompt = `Eres un analista político-digital experto en México. La fecha actual de consulta es: ${fechaCtx}.
+
+Genera un perfil RADAR completo y ACTUALIZADO a ${fechaCtx} del político: "${nombre}".
+
+IMPORTANTE: Usa información real y actualizada a ${fechaCtx}. Si el político cambió de cargo, usa el cargo correcto a esa fecha. Incluye eventos, escándalos, logros y narrativas relevantes de ese periodo específico.
+
+Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, sin texto adicional). Todos los valores numéricos en "pct" deben ser números enteros sin signo + ni -:
 
 {
   "nombre": "Nombre completo oficial",
-  "cargo": "Cargo actual · Partido · Periodo",
+  "cargo": "Cargo exacto a ${fechaCtx} · Partido · Periodo",
+  "fecha_analisis": "${fechaCtx}",
   "tags": ["Tag1", "Tag2", "Tag3"],
   "clima": "MIXTO-ADVERSO",
   "kpis": [
-    {"label": "SEGUIDORES TOTALES", "valor": "X.XM", "nota": "contexto", "tipo": "acc"},
+    {"label": "SEGUIDORES TOTALES", "valor": "X.XM", "nota": "contexto a ${fechaCtx}", "tipo": "acc"},
     {"label": "APROBACIÓN EST.", "valor": "XX%", "nota": "contexto", "tipo": "suc"},
-    {"label": "PICOS NEGATIVOS", "valor": "X", "nota": "temas de crisis", "tipo": "dan"},
+    {"label": "PICOS NEGATIVOS", "valor": "X", "nota": "temas de crisis en el periodo", "tipo": "dan"},
     {"label": "NARRATIVA PROPIA VS IMPUESTA", "valor": "XX/XX", "nota": "contexto", "tipo": "gld"},
     {"label": "SENTIMIENTO POSITIVO", "valor": "XX%", "nota": "conversación favorable", "tipo": "suc"},
     {"label": "TENDENCIA", "valor": "↑ Estable", "nota": "contexto", "tipo": "acc"}
@@ -33,7 +40,7 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
     {"label": "Polarizado", "pct": 10}
   ],
   "temas": [
-    {"tema": "Tema 1", "pct": 38, "color": "success"},
+    {"tema": "Tema principal", "pct": 38, "color": "success"},
     {"tema": "Tema 2", "pct": 20, "color": "danger"},
     {"tema": "Tema 3", "pct": 14, "color": "accent"},
     {"tema": "Tema 4", "pct": 12, "color": "danger"},
@@ -41,7 +48,7 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
     {"tema": "Tema 6", "pct": 7, "color": "accent"}
   ],
   "narrativas_favorables": [
-    {"titulo": "Narrativa positiva 1", "descripcion": "Descripción detallada."},
+    {"titulo": "Narrativa positiva 1", "descripcion": "Descripción detallada relevante al periodo ${fechaCtx}."},
     {"titulo": "Narrativa positiva 2", "descripcion": "Descripción detallada."},
     {"titulo": "Narrativa positiva 3", "descripcion": "Descripción detallada."}
   ],
@@ -55,11 +62,11 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
     {"titulo": "Narrativa neutral 2", "descripcion": "Descripción detallada."}
   ],
   "cronologia": [
-    {"fecha": "ENE 2026", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Título del evento", "lectura": "Análisis detallado del impacto político-digital."},
-    {"fecha": "FEB 2026", "tipo": "neg", "badge": "EVENTO NEGATIVO — CRÍTICO", "evento": "Título del evento", "lectura": "Análisis del daño reputacional."},
-    {"fecha": "MAR 2026", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Título", "lectura": "Análisis."},
-    {"fecha": "MAR 2026", "tipo": "neg", "badge": "EVENTO NEGATIVO", "evento": "Título", "lectura": "Análisis."},
-    {"fecha": "ABR 2026", "tipo": "neu", "badge": "OPORTUNIDAD", "evento": "Título", "lectura": "Análisis."}
+    {"fecha": "Mes/Año real", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Título real", "lectura": "Análisis del impacto político-digital."},
+    {"fecha": "Mes/Año", "tipo": "neg", "badge": "EVENTO NEGATIVO — CRÍTICO", "evento": "Título real", "lectura": "Análisis del daño."},
+    {"fecha": "Mes/Año", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Título", "lectura": "Análisis."},
+    {"fecha": "Mes/Año", "tipo": "neg", "badge": "EVENTO NEGATIVO", "evento": "Título", "lectura": "Análisis."},
+    {"fecha": "Mes/Año", "tipo": "neu", "badge": "OPORTUNIDAD", "evento": "Título", "lectura": "Análisis."}
   ],
   "riesgos": [
     {"nivel": "CRÍTICO", "titulo": "Riesgo crítico", "descripcion": "Descripción y ventana de actuación."},
@@ -85,7 +92,7 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
     {"tipo": "neu", "badge": "OPORTUNIDAD · TERRITORIAL", "titulo": "Acción de oportunidad", "descripcion": "Descripción."},
     {"tipo": "pos", "badge": "DIGITAL · CONTENIDO", "titulo": "Acción digital", "descripcion": "Descripción."}
   ],
-  "dictamen": "Párrafo ejecutivo completo de 4-5 oraciones con análisis global de la situación político-digital actual.",
+  "dictamen": "Párrafo ejecutivo de 4-5 oraciones con análisis global de la situación político-digital a ${fechaCtx}.",
   "veredictos": [
     {"tipo": "suc", "titulo": "FORTALEZA PRINCIPAL", "cuerpo": "Descripción."},
     {"tipo": "dan", "titulo": "VULNERABILIDAD PRINCIPAL", "cuerpo": "Descripción."},
@@ -96,7 +103,7 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
   ]
 }
 
-Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé específico y analítico.`;
+Usa información real y verificable sobre "${nombre}" en el periodo de ${fechaCtx}. Sé específico con eventos reales de esa fecha.`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -108,7 +115,7 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
         'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model: 'anthropic/claude-haiku-3-5',
         max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -120,22 +127,27 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
     }
 
     const data = await response.json();
-const rawText = data.choices?.[0]?.message?.content || '';
-let cleaned = rawText
-  .replace(/```json\n?/g, '')
-  .replace(/```\n?/g, '')
-  .trim();
-let jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-if (!jsonMatch) return res.status(500).json({ error: 'No se pudo parsear la respuesta' });
-cleaned = jsonMatch[0]
-  .replace(/:\s*\+(\d)/g, ': $1')
-  .replace(/,\s*([}\]])/g, '$1');
-try {
-  const parsed = JSON.parse(cleaned);
-  return res.status(200).json(parsed);
-} catch(e) {
-  return res.status(500).json({ error: 'JSON inválido: ' + e.message, raw: rawText.substring(0, 500) });
-}
+    const rawText = data.choices?.[0]?.message?.content || '';
+
+    // Clean and parse JSON robustly
+    let cleaned = rawText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return res.status(500).json({ error: 'No se pudo parsear la respuesta', raw: rawText.substring(0, 300) });
+
+    cleaned = jsonMatch[0]
+      .replace(/:\s*\+(\d)/g, ': $1')
+      .replace(/,\s*([}\]])/g, '$1');
+
+    try {
+      const parsed = JSON.parse(cleaned);
+      return res.status(200).json(parsed);
+    } catch(e) {
+      return res.status(500).json({ error: 'JSON inválido: ' + e.message, raw: rawText.substring(0, 500) });
+    }
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
