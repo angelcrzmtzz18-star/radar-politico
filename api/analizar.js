@@ -108,7 +108,7 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
         'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-haiku-3-5',
+        model: 'openai/gpt-4o-mini',
         max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
