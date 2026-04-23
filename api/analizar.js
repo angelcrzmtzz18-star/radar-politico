@@ -120,11 +120,19 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
     }
 
     const data = await response.json();
-    const rawText = data.choices?.[0]?.message?.content || '';
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return res.status(500).json({ error: 'No se pudo parsear la respuesta' });
-    const parsed = JSON.parse(jsonMatch[0]);
-    return res.status(200).json(parsed);
+   const rawText = data.choices?.[0]?.message?.content || '';
+let jsonMatch = rawText.match(/\{[\s\S]*\}/);
+if (!jsonMatch) return res.status(500).json({ error: 'No se pudo parsear la respuesta' });
+let cleaned = jsonMatch[0]
+  .replace(/[\x00-\x1F\x7F]/g, ' ')
+  .replace(/,\s*([}\]])/g, '$1')
+  .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
+try {
+  const parsed = JSON.parse(cleaned);
+  return res.status(200).json(parsed);
+} catch(e) {
+  return res.status(500).json({ error: 'JSON inválido: ' + e.message, raw: rawText.substring(0, 500) });
+}
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
