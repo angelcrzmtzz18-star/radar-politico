@@ -108,7 +108,7 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
         'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-lite-001',
+        model: 'google/gemini-2.0-flash-001',
         max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -120,13 +120,16 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
     }
 
     const data = await response.json();
-   const rawText = data.choices?.[0]?.message?.content || '';
-let jsonMatch = rawText.match(/\{[\s\S]*\}/);
+const rawText = data.choices?.[0]?.message?.content || '';
+let cleaned = rawText
+  .replace(/```json\n?/g, '')
+  .replace(/```\n?/g, '')
+  .trim();
+let jsonMatch = cleaned.match(/\{[\s\S]*\}/);
 if (!jsonMatch) return res.status(500).json({ error: 'No se pudo parsear la respuesta' });
-let cleaned = jsonMatch[0]
-  .replace(/[\x00-\x1F\x7F]/g, ' ')
-  .replace(/,\s*([}\]])/g, '$1')
-  .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
+cleaned = jsonMatch[0]
+  .replace(/:\s*\+(\d)/g, ': $1')
+  .replace(/,\s*([}\]])/g, '$1');
 try {
   const parsed = JSON.parse(cleaned);
   return res.status(200).json(parsed);
