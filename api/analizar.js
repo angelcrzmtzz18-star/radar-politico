@@ -115,7 +115,7 @@ Usa información real y verificable sobre "${nombre}" en el periodo de ${fechaCt
         'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-haiku-3-5',
+        model: 'openai/gpt-4o-mini',
         max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
