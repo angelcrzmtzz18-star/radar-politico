@@ -11,13 +11,49 @@ export default async function handler(req, res) {
 
   const fechaCtx = fecha || 'abril 2026';
 
-  const prompt = `Eres un analista político-digital experto en México. La fecha actual de consulta es: ${fechaCtx}.
+  // PASO 1: Buscar información real con Tavily
+  let contextoReal = '';
+  try {
+    const tavilyRes = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: process.env.TAVILY_API_KEY,
+        query: `${nombre} político México noticias ${fechaCtx}`,
+        search_depth: 'advanced',
+        max_results: 8,
+        include_answer: true,
+        include_raw_content: false
+      })
+    });
 
-Genera un perfil RADAR completo y ACTUALIZADO a ${fechaCtx} del político: "${nombre}".
+    if (tavilyRes.ok) {
+      const tavilyData = await tavilyRes.json();
+      const resultados = (tavilyData.results || []).map(r =>
+        `FUENTE: ${r.title}\nURL: ${r.url}\nCONTENIDO: ${r.content}`
+      ).join('\n\n---\n\n');
+      const respuestaDirecta = tavilyData.answer || '';
+      contextoReal = `INFORMACION REAL ENCONTRADA EN INTERNET:\n\nResumen: ${respuestaDirecta}\n\nFuentes:\n${resultados}`;
+    }
+  } catch (e) {
+    contextoReal = 'No se pudo obtener informacion en tiempo real. Usa tu conocimiento base.';
+  }
 
-IMPORTANTE: Usa información real y actualizada a ${fechaCtx}. Si el político cambió de cargo, usa el cargo correcto a esa fecha. Incluye eventos, escándalos, logros y narrativas relevantes de ese periodo específico.
+  // PASO 2: Generar análisis con GPT-4o Mini usando el contexto real
+  const prompt = `Eres un analista politico-digital experto en Mexico. La fecha de consulta es: ${fechaCtx}.
 
-Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, sin texto adicional). Todos los valores numéricos en "pct" deben ser números enteros sin signo + ni -:
+INFORMACION REAL Y ACTUAL SOBRE "${nombre}" (obtenida de internet ahora mismo):
+${contextoReal}
+
+Basandote en esa informacion real, genera un perfil RADAR completo y ACTUALIZADO a ${fechaCtx} del politico: "${nombre}".
+
+IMPORTANTE: 
+- Usa la informacion real proporcionada arriba como base principal
+- El cargo debe ser el correcto a ${fechaCtx} segun las fuentes
+- Los eventos de la cronologia deben ser reales segun las fuentes
+- Se especifico con datos verificables
+
+Responde UNICAMENTE con un objeto JSON valido (sin markdown, sin backticks, sin texto adicional). Todos los valores numericos en "pct" deben ser numeros enteros sin signo + ni -:
 
 {
   "nombre": "Nombre completo oficial",
@@ -26,12 +62,12 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
   "tags": ["Tag1", "Tag2", "Tag3"],
   "clima": "MIXTO-ADVERSO",
   "kpis": [
-    {"label": "SEGUIDORES TOTALES", "valor": "X.XM", "nota": "contexto a ${fechaCtx}", "tipo": "acc"},
-    {"label": "APROBACIÓN EST.", "valor": "XX%", "nota": "contexto", "tipo": "suc"},
-    {"label": "PICOS NEGATIVOS", "valor": "X", "nota": "temas de crisis en el periodo", "tipo": "dan"},
+    {"label": "SEGUIDORES TOTALES", "valor": "X.XM", "nota": "contexto", "tipo": "acc"},
+    {"label": "APROBACION EST.", "valor": "XX%", "nota": "contexto", "tipo": "suc"},
+    {"label": "PICOS NEGATIVOS", "valor": "X", "nota": "temas de crisis", "tipo": "dan"},
     {"label": "NARRATIVA PROPIA VS IMPUESTA", "valor": "XX/XX", "nota": "contexto", "tipo": "gld"},
-    {"label": "SENTIMIENTO POSITIVO", "valor": "XX%", "nota": "conversación favorable", "tipo": "suc"},
-    {"label": "TENDENCIA", "valor": "↑ Estable", "nota": "contexto", "tipo": "acc"}
+    {"label": "SENTIMIENTO POSITIVO", "valor": "XX%", "nota": "conversacion favorable", "tipo": "suc"},
+    {"label": "TENDENCIA", "valor": "Estable", "nota": "contexto", "tipo": "acc"}
   ],
   "sentimiento": [
     {"label": "Positivo", "pct": 40},
@@ -48,62 +84,60 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks, si
     {"tema": "Tema 6", "pct": 7, "color": "accent"}
   ],
   "narrativas_favorables": [
-    {"titulo": "Narrativa positiva 1", "descripcion": "Descripción detallada relevante al periodo ${fechaCtx}."},
-    {"titulo": "Narrativa positiva 2", "descripcion": "Descripción detallada."},
-    {"titulo": "Narrativa positiva 3", "descripcion": "Descripción detallada."}
+    {"titulo": "Narrativa positiva 1", "descripcion": "Descripcion detallada basada en fuentes reales."},
+    {"titulo": "Narrativa positiva 2", "descripcion": "Descripcion detallada."},
+    {"titulo": "Narrativa positiva 3", "descripcion": "Descripcion detallada."}
   ],
   "narrativas_criticas": [
-    {"titulo": "Narrativa crítica 1", "descripcion": "Descripción detallada."},
-    {"titulo": "Narrativa crítica 2", "descripcion": "Descripción detallada."},
-    {"titulo": "Narrativa crítica 3", "descripcion": "Descripción detallada."}
+    {"titulo": "Narrativa critica 1", "descripcion": "Descripcion detallada."},
+    {"titulo": "Narrativa critica 2", "descripcion": "Descripcion detallada."},
+    {"titulo": "Narrativa critica 3", "descripcion": "Descripcion detallada."}
   ],
   "narrativas_neutras": [
-    {"titulo": "Narrativa neutral 1", "descripcion": "Descripción detallada."},
-    {"titulo": "Narrativa neutral 2", "descripcion": "Descripción detallada."}
+    {"titulo": "Narrativa neutral 1", "descripcion": "Descripcion detallada."},
+    {"titulo": "Narrativa neutral 2", "descripcion": "Descripcion detallada."}
   ],
   "cronologia": [
-    {"fecha": "Mes/Año real", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Título real", "lectura": "Análisis del impacto político-digital."},
-    {"fecha": "Mes/Año", "tipo": "neg", "badge": "EVENTO NEGATIVO — CRÍTICO", "evento": "Título real", "lectura": "Análisis del daño."},
-    {"fecha": "Mes/Año", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Título", "lectura": "Análisis."},
-    {"fecha": "Mes/Año", "tipo": "neg", "badge": "EVENTO NEGATIVO", "evento": "Título", "lectura": "Análisis."},
-    {"fecha": "Mes/Año", "tipo": "neu", "badge": "OPORTUNIDAD", "evento": "Título", "lectura": "Análisis."}
+    {"fecha": "Mes/Anio real", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Titulo real", "lectura": "Analisis del impacto."},
+    {"fecha": "Mes/Anio", "tipo": "neg", "badge": "EVENTO NEGATIVO", "evento": "Titulo real", "lectura": "Analisis del dano."},
+    {"fecha": "Mes/Anio", "tipo": "pos", "badge": "EVENTO POSITIVO", "evento": "Titulo", "lectura": "Analisis."},
+    {"fecha": "Mes/Anio", "tipo": "neg", "badge": "EVENTO NEGATIVO", "evento": "Titulo", "lectura": "Analisis."},
+    {"fecha": "Mes/Anio", "tipo": "neu", "badge": "OPORTUNIDAD", "evento": "Titulo", "lectura": "Analisis."}
   ],
   "riesgos": [
-    {"nivel": "CRÍTICO", "titulo": "Riesgo crítico", "descripcion": "Descripción y ventana de actuación."},
-    {"nivel": "ALTO", "titulo": "Riesgo alto 1", "descripcion": "Descripción."},
-    {"nivel": "ALTO", "titulo": "Riesgo alto 2", "descripcion": "Descripción."},
-    {"nivel": "MEDIO", "titulo": "Riesgo medio", "descripcion": "Descripción."}
+    {"nivel": "CRITICO", "titulo": "Riesgo critico", "descripcion": "Descripcion y ventana de actuacion."},
+    {"nivel": "ALTO", "titulo": "Riesgo alto 1", "descripcion": "Descripcion."},
+    {"nivel": "ALTO", "titulo": "Riesgo alto 2", "descripcion": "Descripcion."},
+    {"nivel": "MEDIO", "titulo": "Riesgo medio", "descripcion": "Descripcion."}
   ],
   "oportunidades": [
-    {"nivel": "ALTO", "titulo": "Oportunidad principal", "descripcion": "Descripción y cómo capitalizarla."},
-    {"nivel": "ALTO", "titulo": "Oportunidad 2", "descripcion": "Descripción."},
-    {"nivel": "MEDIO", "titulo": "Oportunidad 3", "descripcion": "Descripción."},
-    {"nivel": "MEDIO", "titulo": "Oportunidad 4", "descripcion": "Descripción."}
+    {"nivel": "ALTO", "titulo": "Oportunidad principal", "descripcion": "Descripcion y como capitalizarla."},
+    {"nivel": "ALTO", "titulo": "Oportunidad 2", "descripcion": "Descripcion."},
+    {"nivel": "MEDIO", "titulo": "Oportunidad 3", "descripcion": "Descripcion."},
+    {"nivel": "MEDIO", "titulo": "Oportunidad 4", "descripcion": "Descripcion."}
   ],
   "recomendaciones_corto": [
-    {"tipo": "neg", "badge": "URGENTE · REPUTACIONAL", "titulo": "Acción urgente 1", "descripcion": "Descripción y justificación estratégica."},
-    {"tipo": "neg", "badge": "URGENTE · INSTITUCIONAL", "titulo": "Acción urgente 2", "descripcion": "Descripción."},
-    {"tipo": "pos", "badge": "PRIORITARIO · NARRATIVA", "titulo": "Acción prioritaria", "descripcion": "Descripción."},
-    {"tipo": "neu", "badge": "PREVENTIVO · POLÍTICO", "titulo": "Acción preventiva", "descripcion": "Descripción."}
+    {"tipo": "neg", "badge": "URGENTE · REPUTACIONAL", "titulo": "Accion urgente 1", "descripcion": "Descripcion estrategica."},
+    {"tipo": "neg", "badge": "URGENTE · INSTITUCIONAL", "titulo": "Accion urgente 2", "descripcion": "Descripcion."},
+    {"tipo": "pos", "badge": "PRIORITARIO · NARRATIVA", "titulo": "Accion prioritaria", "descripcion": "Descripcion."},
+    {"tipo": "neu", "badge": "PREVENTIVO · POLITICO", "titulo": "Accion preventiva", "descripcion": "Descripcion."}
   ],
   "recomendaciones_mediano": [
-    {"tipo": "pos", "badge": "ESTRATÉGICO · BLINDAJE", "titulo": "Acción estratégica 1", "descripcion": "Descripción."},
-    {"tipo": "pos", "badge": "ESTRATÉGICO · PROXIMIDAD", "titulo": "Acción estratégica 2", "descripcion": "Descripción."},
-    {"tipo": "neu", "badge": "OPORTUNIDAD · TERRITORIAL", "titulo": "Acción de oportunidad", "descripcion": "Descripción."},
-    {"tipo": "pos", "badge": "DIGITAL · CONTENIDO", "titulo": "Acción digital", "descripcion": "Descripción."}
+    {"tipo": "pos", "badge": "ESTRATEGICO · BLINDAJE", "titulo": "Accion estrategica 1", "descripcion": "Descripcion."},
+    {"tipo": "pos", "badge": "ESTRATEGICO · PROXIMIDAD", "titulo": "Accion estrategica 2", "descripcion": "Descripcion."},
+    {"tipo": "neu", "badge": "OPORTUNIDAD · TERRITORIAL", "titulo": "Accion de oportunidad", "descripcion": "Descripcion."},
+    {"tipo": "pos", "badge": "DIGITAL · CONTENIDO", "titulo": "Accion digital", "descripcion": "Descripcion."}
   ],
-  "dictamen": "Párrafo ejecutivo de 4-5 oraciones con análisis global de la situación político-digital a ${fechaCtx}.",
+  "dictamen": "Parrafo ejecutivo de 4-5 oraciones con analisis global de la situacion politico-digital.",
   "veredictos": [
-    {"tipo": "suc", "titulo": "FORTALEZA PRINCIPAL", "cuerpo": "Descripción."},
-    {"tipo": "dan", "titulo": "VULNERABILIDAD PRINCIPAL", "cuerpo": "Descripción."},
-    {"tipo": "acc", "titulo": "NARRATIVA A REFORZAR", "cuerpo": "Descripción."},
-    {"tipo": "gld", "titulo": "NARRATIVA A DESACTIVAR", "cuerpo": "Descripción y ventana."},
-    {"tipo": "neu", "titulo": "OPORTUNIDAD INMEDIATA", "cuerpo": "Descripción."},
-    {"tipo": "ris", "titulo": "RIESGO SI NO ACTÚA", "cuerpo": "Descripción del escenario negativo."}
+    {"tipo": "suc", "titulo": "FORTALEZA PRINCIPAL", "cuerpo": "Descripcion."},
+    {"tipo": "dan", "titulo": "VULNERABILIDAD PRINCIPAL", "cuerpo": "Descripcion."},
+    {"tipo": "acc", "titulo": "NARRATIVA A REFORZAR", "cuerpo": "Descripcion."},
+    {"tipo": "gld", "titulo": "NARRATIVA A DESACTIVAR", "cuerpo": "Descripcion y ventana."},
+    {"tipo": "neu", "titulo": "OPORTUNIDAD INMEDIATA", "cuerpo": "Descripcion."},
+    {"tipo": "ris", "titulo": "RIESGO SI NO ACTUA", "cuerpo": "Descripcion del escenario negativo."}
   ]
-}
-
-Usa información real y verificable sobre "${nombre}" en el periodo de ${fechaCtx}. Sé específico con eventos reales de esa fecha.`;
+}`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -112,7 +146,7 @@ Usa información real y verificable sobre "${nombre}" en el periodo de ${fechaCt
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'HTTP-Referer': 'https://radar-politico.vercel.app',
-        'X-Title': 'RADAR Político'
+        'X-Title': 'RADAR Politico'
       },
       body: JSON.stringify({
         model: 'openai/gpt-4o-mini',
@@ -129,7 +163,6 @@ Usa información real y verificable sobre "${nombre}" en el periodo de ${fechaCt
     const data = await response.json();
     const rawText = data.choices?.[0]?.message?.content || '';
 
-    // Clean and parse JSON robustly
     let cleaned = rawText
       .replace(/```json\n?/g, '')
       .replace(/```\n?/g, '')
@@ -146,7 +179,7 @@ Usa información real y verificable sobre "${nombre}" en el periodo de ${fechaCt
       const parsed = JSON.parse(cleaned);
       return res.status(200).json(parsed);
     } catch(e) {
-      return res.status(500).json({ error: 'JSON inválido: ' + e.message, raw: rawText.substring(0, 500) });
+      return res.status(500).json({ error: 'JSON invalido: ' + e.message, raw: rawText.substring(0, 500) });
     }
 
   } catch (err) {
