@@ -108,7 +108,7 @@ Basa todo en información real sobre "${nombre}". Usa datos 2024-2026. Sé espec
         'X-Title': 'RADAR Político'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-001',
+        model: 'mistralai/mistral-small-3.2-24b-instruct:free',
         max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }]
       })
