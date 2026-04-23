@@ -4,516 +4,1392 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RADAR · Inteligencia Político-Digital</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0D1B2A;--navy2:#152637;--blue:#1B4F8A;--accent:#00C2D4;--gold:#F4C430;--danger:#E63946;--success:#2EC4B6;--neutral:#8FA3B1;--white:#FFFFFF;--card:rgba(255,255,255,0.04);--border:rgba(0,194,212,0.15)}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,194,212,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,212,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.wrap{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
-.header{border-bottom:1px solid var(--border);padding:18px 0;position:sticky;top:0;background:rgba(13,27,42,0.95);backdrop-filter:blur(12px);z-index:100}
-.header-inner{display:flex;align-items:center;justify-content:space-between}
-.logo{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--accent);letter-spacing:6px}
-.logo span{color:var(--white);opacity:.3}
-.header-meta{font-family:'Space Mono',monospace;font-size:9px;color:var(--neutral);text-align:right;letter-spacing:1px}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;margin-right:5px;vertical-align:middle}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+:root {
+  --bg: #070B14;
+  --surface: #0E183B;
+  --surface2: #111d47;
+  --border: #1e2d5a;
+  --border2: #2a3f7a;
+  --accent: #3B82F6;
+  --accent2: #60a5fa;
+  --steel: #64748B;
+  --text: #E2E8F0;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --success: #10B981;
+  --danger: #EF4444;
+  --gold: #F59E0B;
+  --neu: #64748B;
+  --ris: #f97316;
+}
 
-/* SEARCH */
-#searchScreen{text-align:center;padding:80px 24px 60px}
-.hero-logo{font-family:'Space Mono',monospace;font-size:48px;font-weight:700;color:var(--accent);letter-spacing:16px;margin-bottom:8px}
-.hero-sub{font-family:'Space Mono',monospace;font-size:9px;color:rgba(143,163,177,0.6);letter-spacing:3px;margin-bottom:48px}
-.search-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:3px;margin-bottom:14px}
-.search-row{display:flex;gap:10px;max-width:520px;margin:0 auto 14px}
-.search-input{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(0,194,212,0.25);border-radius:4px;padding:14px 18px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
-.search-input::placeholder{color:rgba(143,163,177,.4)}
-.search-input:focus{border-color:rgba(0,194,212,.6)}
-.search-btn{background:var(--accent);color:var(--navy);border:none;border-radius:4px;padding:14px 22px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:opacity .2s}
-.search-btn:hover{opacity:.85}
-.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.chip{font-family:'Space Mono',monospace;font-size:9px;padding:5px 12px;border-radius:2px;background:rgba(0,194,212,.07);color:rgba(0,194,212,.7);border:1px solid rgba(0,194,212,.2);cursor:pointer;letter-spacing:.5px;transition:background .15s}
-.chip:hover{background:rgba(0,194,212,.14)}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* LOADING */
-#loadingScreen{display:none;text-align:center;padding:80px 24px}
-.load-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);margin-bottom:8px}
-.load-msg{font-family:'Space Mono',monospace;font-size:9px;color:var(--neutral);letter-spacing:2px;margin-bottom:32px}
-.load-bar{width:280px;height:2px;background:rgba(0,194,212,.12);border-radius:2px;margin:0 auto 24px;overflow:hidden}
-.load-fill{height:100%;background:var(--accent);width:0%;border-radius:2px;transition:width .5s ease}
-.load-steps{display:flex;flex-direction:column;gap:8px}
-.step{font-family:'Space Mono',monospace;font-size:9px;color:#4A5568;letter-spacing:1px;transition:color .3s}
-.step.done{color:var(--success)}
-.step.active{color:var(--accent)}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s;
+  box-shadow: 0 0 12px var(--accent);
+}
+.cursor-ring {
+  width: 28px; height: 28px;
+  border: 1px solid rgba(59,130,246,0.4);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.15s ease;
+  transform: translate(-50%,-50%);
+}
+
+/* Scanlines overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Noise texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* HEADER */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,11,20,0.95);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 6px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+.header-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  text-align: right;
+  letter-spacing: 1px;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--success);
+  letter-spacing: 1px;
+}
+.status-bar::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse-dot 1.5s infinite;
+}
+
+/* SEARCH SECTION */
+.search-section {
+  padding: 60px 40px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.search-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.search-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 5vw, 64px);
+  letter-spacing: 4px;
+  line-height: 1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.search-subtitle {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 36px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1fr 220px auto;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap input, .input-wrap select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+  appearance: none;
+}
+
+.input-wrap input:focus, .input-wrap select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 20px rgba(59,130,246,0.15);
+}
+
+.input-wrap select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.input-wrap select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-analizar {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-analizar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-analizar:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(59,130,246,0.4); }
+.btn-analizar:hover::before { opacity: 1; }
+.btn-analizar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 6px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: none;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(59,130,246,0.08);
+}
+
+/* LOADING STATE */
+.loading-state {
+  display: none;
+  padding: 80px 40px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.loading-state.active { display: block; }
+
+.loader-ring {
+  width: 60px; height: 60px;
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 32px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.loader-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 12px;
+  letter-spacing: 1px;
+}
+
+/* ERROR STATE */
+.error-state {
+  display: none;
+  padding: 40px;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+.error-state.active { display: block; }
+.error-box {
+  border: 1px solid var(--danger);
+  background: rgba(239,68,68,0.05);
+  padding: 24px;
+}
+.error-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--danger);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.error-msg { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.btn-retry {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 10px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: none;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+}
+.btn-retry:hover { border-color: var(--accent); color: var(--accent); }
 
 /* DASHBOARD */
-#dashScreen{display:none;padding:0 0 60px}
+#dashboard {
+  display: none;
+  padding: 0 40px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease;
+}
+#dashboard.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* HERO */
-.dash-hero{padding:40px 0 28px;border-bottom:1px solid var(--border);margin-bottom:0}
-.dash-hero-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.dash-name{font-family:'Syne',sans-serif;font-size:clamp(36px,5vw,64px);font-weight:800;line-height:1;margin-bottom:8px;text-transform:uppercase}
-.dash-name span{color:var(--accent)}
-.dash-role{font-size:13px;color:var(--neutral);font-weight:300;margin-bottom:16px}
-.hero-tags{display:flex;gap:8px;flex-wrap:wrap}
-.htag{font-family:'Space Mono',monospace;font-size:9px;padding:5px 12px;border-radius:2px;letter-spacing:1px;font-weight:700}
-.htag-acc{background:rgba(0,194,212,.12);color:var(--accent);border:1px solid rgba(0,194,212,.3)}
-.htag-gld{background:rgba(244,196,48,.1);color:var(--gold);border:1px solid rgba(244,196,48,.3)}
-.htag-neu{background:rgba(143,163,177,.1);color:var(--neutral);border:1px solid rgba(143,163,177,.3)}
-.back-btn{font-family:'Space Mono',monospace;font-size:9px;padding:8px 16px;border-radius:2px;background:rgba(0,194,212,.07);color:var(--accent);border:1px solid rgba(0,194,212,.2);cursor:pointer;letter-spacing:1px;white-space:nowrap;transition:background .15s;flex-shrink:0;margin-top:4px}
-.back-btn:hover{background:rgba(0,194,212,.14)}
+.hero {
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(14,24,59,0.5) 100%);
+  padding: 36px 40px;
+  margin-bottom: 2px;
+  position: relative;
+  overflow: hidden;
+}
 
-/* KPI */
-.kpi-section{padding:28px 0;border-bottom:1px solid var(--border)}
-.sec-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:18px 16px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
-.kpi-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
-.kpi-card.acc::before{background:var(--accent)}
-.kpi-card.suc::before{background:var(--success)}
-.kpi-card.dan::before{background:var(--danger)}
-.kpi-card.gld::before{background:var(--gold)}
-.kpi-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--neutral);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
-.kpi-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;margin-bottom:4px}
-.kpi-card.acc .kpi-val{color:var(--accent)}
-.kpi-card.suc .kpi-val{color:var(--success)}
-.kpi-card.dan .kpi-val{color:var(--danger)}
-.kpi-card.gld .kpi-val{color:var(--gold)}
-.kpi-note{font-size:10px;color:var(--neutral)}
+.hero::before {
+  content: 'CLASSIFIED';
+  position: absolute;
+  top: 20px; right: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--border2);
+  letter-spacing: 4px;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+}
+
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3);
+  padding: 4px 10px;
+  letter-spacing: 1px;
+  background: rgba(59,130,246,0.05);
+}
+
+.hero-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(42px, 6vw, 80px);
+  letter-spacing: 3px;
+  line-height: 0.95;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.hero-cargo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.hero-fecha {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 2px;
+}
+
+.clima-badge {
+  position: absolute;
+  bottom: 36px; right: 40px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  border: 1px solid;
+}
+
+.clima-FAVORABLE { border-color: var(--success); color: var(--success); background: rgba(16,185,129,0.08); }
+.clima-ADVERSO { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.08); }
+.clima-MIXTO-ADVERSO { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.08); }
+.clima-MIXTO { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.08); }
+.clima-NEUTRO { border-color: var(--steel); color: var(--steel); background: rgba(100,116,139,0.08); }
+
+/* KPIs */
+.kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.kpi-card.acc::after { background: var(--accent); }
+.kpi-card.suc::after { background: var(--success); }
+.kpi-card.dan::after { background: var(--danger); }
+.kpi-card.gld::after { background: var(--gold); }
+.kpi-card.neu::after { background: var(--steel); }
+
+.kpi-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.kpi-valor {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.kpi-card.acc .kpi-valor { color: var(--accent2); }
+.kpi-card.suc .kpi-valor { color: var(--success); }
+.kpi-card.dan .kpi-valor { color: var(--danger); }
+.kpi-card.gld .kpi-valor { color: var(--gold); }
+.kpi-card.neu .kpi-valor { color: var(--steel); }
+
+.kpi-nota {
+  font-size: 10px;
+  color: var(--text3);
+  line-height: 1.3;
+}
 
 /* TABS */
-.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0;overflow-x:auto}
-.tab-btn{font-family:'Space Mono',monospace;font-size:9px;padding:14px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--neutral);cursor:pointer;letter-spacing:1.5px;white-space:nowrap;transition:all .15s}
-.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-btn:hover:not(.active){color:#fff}
-.tab-content{padding:32px 0}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
+.tabs-bar {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px;
+  background: var(--bg);
+}
 
-/* CHART GRID */
-.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
-@media(max-width:768px){.chart-grid{grid-template-columns:1fr}}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:24px}
-.chart-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px}
-.chart-sub{font-size:11px;color:var(--neutral);margin-bottom:20px;font-weight:300}
-canvas{max-height:220px}
+.tab-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  color: var(--text3);
+  padding: 12px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  cursor: none;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  flex: 1;
+  text-align: center;
+}
+
+.tab-btn:hover { color: var(--text2); border-color: var(--border2); }
+.tab-btn.active { background: var(--surface2); color: var(--accent); border-color: var(--accent); }
+
+.tab-panel {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px;
+  animation: fadeIn 0.3s ease;
+}
+.tab-panel.active { display: block; }
+
+/* SECTION TITLE */
+.section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* CHARTS */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.chart-block { }
+
+.chart-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.bar-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text2);
+  width: 130px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  position: absolute;
+  left: 0; top: 0;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+.bar-fill.success { background: var(--success); }
+.bar-fill.danger { background: var(--danger); }
+.bar-fill.accent { background: var(--accent); }
+.bar-fill.gold { background: var(--gold); }
+.bar-fill.positivo { background: var(--success); }
+.bar-fill.negativo { background: var(--danger); }
+.bar-fill.neutro { background: var(--steel); }
+.bar-fill.polarizado { background: var(--gold); }
+
+.bar-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  width: 36px;
+  text-align: right;
+}
 
 /* NARRATIVAS */
-.nar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
-@media(max-width:900px){.nar-grid{grid-template-columns:1fr}}
-.nar-col{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden}
-.nar-head{padding:12px 16px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px;display:flex;align-items:center;gap:8px}
-.nar-head.fav{background:rgba(46,196,182,.15);color:var(--success);border-bottom:1px solid rgba(46,196,182,.2)}
-.nar-head.crit{background:rgba(230,57,70,.15);color:var(--danger);border-bottom:1px solid rgba(230,57,70,.2)}
-.nar-head.neu{background:rgba(143,163,177,.1);color:var(--neutral);border-bottom:1px solid var(--border)}
-.nar-item{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .15s;position:relative}
-.nar-item:hover{background:rgba(255,255,255,.03)}
-.nar-item:last-child{border-bottom:none}
-.nar-title{font-size:12px;font-weight:500;margin-bottom:3px}
-.nar-desc{font-size:11px;color:var(--neutral);font-weight:300;line-height:1.4;display:none}
-.nar-item.open .nar-desc{display:block;margin-top:6px}
+.narrativas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
 
-/* TIMELINE */
-.timeline{position:relative;padding:10px 0;margin-bottom:32px}
-.timeline::before{content:'';position:absolute;left:120px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent,var(--blue),transparent)}
-.tl-item{display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;position:relative;cursor:pointer;transition:opacity .2s}
-.tl-item:hover{opacity:.85}
-.tl-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--neutral);min-width:100px;text-align:right;padding-top:3px;letter-spacing:.5px}
-.tl-dot{width:14px;height:14px;border-radius:50%;margin-left:-6px;flex-shrink:0;margin-top:4px;border:2px solid var(--navy)}
-.tl-dot.pos{background:var(--success);box-shadow:0 0 8px var(--success)}
-.tl-dot.neg{background:var(--danger);box-shadow:0 0 8px var(--danger)}
-.tl-dot.neu{background:var(--gold);box-shadow:0 0 8px var(--gold)}
-.tl-content{flex:1;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 16px}
-.tl-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:8px;padding:2px 7px;border-radius:2px;margin-bottom:6px;letter-spacing:.5px;font-weight:700}
-.badge-pos{background:rgba(46,196,182,.15);color:var(--success)}
-.badge-neg{background:rgba(230,57,70,.15);color:var(--danger)}
-.badge-neu{background:rgba(244,196,48,.1);color:var(--gold)}
-.tl-event{font-size:13px;font-weight:500;margin-bottom:4px}
-.tl-reading{font-size:11px;color:var(--neutral);font-weight:300;line-height:1.5}
+.narrativa-col-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-left: 2px solid;
+}
 
-/* MATRIX */
-.matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
-@media(max-width:768px){.matrix-grid{grid-template-columns:1fr}}
-.matrix-card{background:var(--card);border-radius:4px;overflow:hidden}
-.matrix-head{padding:12px 18px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px}
-.matrix-head.risk{background:rgba(230,57,70,.2);color:var(--danger);border:1px solid rgba(230,57,70,.25);border-bottom:none}
-.matrix-head.opp{background:rgba(46,196,182,.12);color:var(--success);border:1px solid rgba(46,196,182,.2);border-bottom:none}
-.matrix-body{border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px}
-.matrix-row{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
-.matrix-row:last-child{border-bottom:none}
-.lvl{font-family:'Space Mono',monospace;font-size:8px;font-weight:700;padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0}
-.lvl.critico{background:rgba(230,57,70,.2);color:var(--danger);border:1px solid rgba(230,57,70,.3)}
-.lvl.alto{background:rgba(244,196,48,.15);color:var(--gold);border:1px solid rgba(244,196,48,.3)}
-.lvl.medio{background:rgba(0,194,212,.1);color:var(--accent);border:1px solid rgba(0,194,212,.25)}
-.lvl.opp-alto{background:var(--success);color:white}
-.lvl.opp-medio{background:var(--accent);color:var(--navy)}
-.matrix-text strong{display:block;font-size:12px;margin-bottom:3px}
-.matrix-text small{font-size:10px;color:var(--neutral);line-height:1.4}
+.narrativa-col-title.fav { color: var(--success); border-color: var(--success); background: rgba(16,185,129,0.05); }
+.narrativa-col-title.cri { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.05); }
+.narrativa-col-title.neu { color: var(--steel); border-color: var(--steel); background: rgba(100,116,139,0.05); }
+
+.narrativa-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: none;
+  transition: all 0.2s;
+}
+.narrativa-card:hover { border-color: var(--border2); background: rgba(255,255,255,0.04); }
+
+.narrativa-titulo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.narrativa-desc {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.6;
+  display: none;
+}
+
+.narrativa-card.open .narrativa-desc { display: block; }
+.narrativa-card.open { border-color: var(--accent); }
+
+/* CRONOLOGIA */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px; top: 0; bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.timeline-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+.timeline-dot {
+  position: absolute;
+  left: -28px; top: 4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.timeline-item.pos .timeline-dot { background: var(--success); border-color: var(--success); box-shadow: 0 0 8px var(--success); }
+.timeline-item.neg .timeline-dot { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
+.timeline-item.neu .timeline-dot { background: var(--steel); border-color: var(--steel); }
+
+.timeline-fecha {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.timeline-badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  padding: 3px 8px;
+  margin-bottom: 8px;
+  border: 1px solid;
+}
+
+.timeline-item.pos .timeline-badge { color: var(--success); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+.timeline-item.neg .timeline-badge { color: var(--danger); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
+.timeline-item.neu .timeline-badge { color: var(--steel); border-color: rgba(100,116,139,0.3); background: rgba(100,116,139,0.05); }
+
+.timeline-evento {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.timeline-lectura {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* RIESGOS & OPORTUNIDADES */
+.ro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.ro-item {
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 10px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.ro-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.ro-item.CRÍTICO::before { background: var(--danger); }
+.ro-item.ALTO::before { background: var(--gold); }
+.ro-item.MEDIO::before { background: var(--accent); }
+
+.ro-nivel {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.ro-item.CRÍTICO .ro-nivel { color: var(--danger); }
+.ro-item.ALTO .ro-nivel { color: var(--gold); }
+.ro-item.MEDIO .ro-nivel { color: var(--accent); }
+
+.ro-titulo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.ro-desc {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.6;
+}
 
 /* RECOMENDACIONES */
-.rec-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
-@media(max-width:768px){.rec-cols{grid-template-columns:1fr}}
-.rec-period{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;margin-bottom:12px;padding:10px 14px}
-.rec-period.corto{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.2);color:var(--danger)}
-.rec-period.mediano{background:rgba(46,196,182,.06);border:1px solid rgba(46,196,182,.2);color:var(--success)}
-.rec-list{display:flex;flex-direction:column;gap:10px}
-.rec-item{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:14px 16px}
-.rec-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:8px;padding:2px 7px;border-radius:2px;margin-bottom:6px;letter-spacing:.5px;font-weight:700}
-.rec-title{font-size:13px;font-weight:500;margin-bottom:4px}
-.rec-desc{font-size:11px;color:var(--neutral);line-height:1.6}
+.recs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
 
-/* DICTAMEN */
-.dictamen-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:24px;margin-bottom:24px}
-.dictamen-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--accent);letter-spacing:2px;margin-bottom:12px}
-.dictamen-text{font-size:13px;color:var(--neutral);line-height:1.8}
-.verdict-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.verdict-card{border-radius:4px;overflow:hidden;border:1px solid var(--border)}
-.verdict-head{padding:9px 14px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;font-weight:700}
-.verdict-body{padding:12px 14px;font-size:11px;color:var(--neutral);background:var(--card);line-height:1.6}
+.rec-item {
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
 
-/* ERROR */
-#errorScreen{display:none;text-align:center;padding:80px 24px}
-.error-title{font-family:'Space Mono',monospace;font-size:12px;color:var(--danger);letter-spacing:2px;margin-bottom:10px}
-.error-msg{font-size:12px;color:var(--neutral);margin-bottom:20px}
+.rec-badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  padding: 3px 8px;
+  margin-bottom: 8px;
+  border: 1px solid;
+}
 
-footer{border-top:1px solid var(--border);padding:20px 0;margin-top:0}
-.footer-text{font-family:'Space Mono',monospace;font-size:8px;color:rgba(143,163,177,.4);letter-spacing:2px;text-align:center}
+.rec-item.pos .rec-badge { color: var(--success); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+.rec-item.neg .rec-badge { color: var(--danger); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
+.rec-item.neu .rec-badge { color: var(--steel); border-color: rgba(100,116,139,0.3); background: rgba(100,116,139,0.05); }
+
+.rec-titulo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.rec-desc {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.6;
+}
+
+/* CONCLUSIÓN */
+.dictamen-box {
+  border: 1px solid var(--border2);
+  background: rgba(59,130,246,0.04);
+  padding: 28px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.dictamen-box::before {
+  content: 'DICTAMEN EJECUTIVO';
+  position: absolute;
+  top: -1px; left: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  background: var(--bg);
+  padding: 0 8px;
+  transform: translateY(-50%);
+}
+
+.dictamen-text {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.8;
+  font-style: italic;
+}
+
+.veredictos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.veredicto-card {
+  border: 1px solid var(--border);
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.veredicto-card::after {
+  content: '';
+  display: block;
+  height: 2px;
+  margin-top: 12px;
+}
+
+.veredicto-card.suc::after { background: var(--success); }
+.veredicto-card.dan::after { background: var(--danger); }
+.veredicto-card.acc::after { background: var(--accent); }
+.veredicto-card.gld::after { background: var(--gold); }
+.veredicto-card.neu::after { background: var(--steel); }
+.veredicto-card.ris::after { background: var(--ris); }
+
+.veredicto-tipo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.veredicto-card.suc .veredicto-tipo { color: var(--success); }
+.veredicto-card.dan .veredicto-tipo { color: var(--danger); }
+.veredicto-card.acc .veredicto-tipo { color: var(--accent); }
+.veredicto-card.gld .veredicto-tipo { color: var(--gold); }
+.veredicto-card.neu .veredicto-tipo { color: var(--steel); }
+.veredicto-card.ris .veredicto-tipo { color: var(--ris); }
+
+.veredicto-titulo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.veredicto-cuerpo {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.footer-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--text3);
+}
+
+.footer-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+  header { padding: 16px 20px; }
+  .search-section { padding: 40px 20px 24px; }
+  .search-row { grid-template-columns: 1fr; }
+  #dashboard { padding: 0 20px 40px; }
+  .kpis-grid { grid-template-columns: repeat(2, 1fr); }
+  .narrativas-grid { grid-template-columns: 1fr; }
+  .charts-grid, .ro-grid, .recs-grid, .veredictos-grid { grid-template-columns: 1fr; }
+  .tabs-bar { flex-wrap: wrap; }
+  .tab-btn { flex: none; width: calc(50% - 1px); }
+  .hero-name { font-size: 36px; }
+  .clima-badge { position: static; margin-top: 16px; display: inline-block; }
+  footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px; }
+}
 </style>
 </head>
 <body>
-<header class="header">
-  <div class="wrap">
-    <div class="header-inner">
-      <div class="logo">RADAR<span>·</span><span style="font-size:13px;letter-spacing:3px;opacity:.5">///</span></div>
-      <div class="header-meta"><span class="dot"></span>SISTEMA ACTIVO<br>INTELIGENCIA POLÍTICO-DIGITAL</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    RADAR
+  </div>
+  <div>
+    <div class="header-meta">SISTEMA ACTIVO · INTELIGENCIA POLÍTICO-DIGITAL</div>
+    <div style="margin-top:6px; display:flex; justify-content:flex-end;">
+      <div class="status-bar">ONLINE · SECURE CONNECTION</div>
     </div>
   </div>
 </header>
 
-<main>
-  <!-- SEARCH -->
-  <div class="wrap" id="searchScreen">
-    <div style="text-align:center;padding:80px 24px 60px">
-      <div class="hero-logo">RADAR</div>
-      <div class="hero-sub">SISTEMA DE INTELIGENCIA POLÍTICO-DIGITAL · MÉXICO 2026</div>
-      <div class="search-label">// INGRESA EL NOMBRE DE UN POLÍTICO PARA GENERAR SU ANÁLISIS</div>
-      <div class="search-row">
-        <input class="search-input" id="nameInput" type="text" placeholder="ej. Claudia Sheinbaum, Xóchitl Gálvez..."/>
-        <button class="search-btn" onclick="startSearch()">ANALIZAR</button>
-      </div>
-      <div class="chips">
-        <span class="chip" onclick="quickSearch('Claudia Sheinbaum')">Claudia Sheinbaum</span>
-        <span class="chip" onclick="quickSearch('Xóchitl Gálvez')">Xóchitl Gálvez</span>
-        <span class="chip" onclick="quickSearch('Ricardo Monreal')">Ricardo Monreal</span>
-        <span class="chip" onclick="quickSearch('Santiago Taboada')">Santiago Taboada</span>
-        <span class="chip" onclick="quickSearch('Mario Delgado')">Mario Delgado</span>
-      </div>
+<section class="search-section" id="searchSection">
+  <div class="search-label">// Sistema de análisis · v2.0</div>
+  <h1 class="search-title">INTELIGENCIA<br>POLÍTICO-DIGITAL</h1>
+  <p class="search-subtitle">Ingresa el nombre de un político para generar su perfil RADAR completo con IA</p>
+
+  <div class="search-row">
+    <div class="input-wrap">
+      <input type="text" id="nombreInput" placeholder="Nombre del político..." autocomplete="off" />
     </div>
+    <div class="input-wrap">
+      <select id="fechaSelect">
+        <option value="abril 2026">Abril 2026</option>
+        <option value="enero 2026">Enero 2026</option>
+        <option value="octubre 2025">Octubre 2025</option>
+        <option value="julio 2025">Julio 2025</option>
+        <option value="abril 2025">Abril 2025</option>
+        <option value="enero 2025">Enero 2025</option>
+        <option value="octubre 2024">Octubre 2024</option>
+        <option value="julio 2024">Julio 2024</option>
+        <option value="enero 2024">Enero 2024</option>
+      </select>
+    </div>
+    <button class="btn-analizar" id="btnAnalizar" onclick="analizar()">ANALIZAR →</button>
   </div>
 
-  <!-- LOADING -->
-  <div class="wrap" id="loadingScreen">
-    <div class="load-name" id="loadName"></div>
-    <div class="load-msg" id="loadMsg">INICIANDO ANÁLISIS...</div>
-    <div class="load-bar"><div class="load-fill" id="loadFill"></div></div>
-    <div class="load-steps">
-      <div class="step" id="s1">[ ] Buscando información pública y reciente</div>
-      <div class="step" id="s2">[ ] Analizando narrativas en redes y medios</div>
-      <div class="step" id="s3">[ ] Calculando indicadores de posicionamiento</div>
-      <div class="step" id="s4">[ ] Generando dictamen estratégico</div>
-    </div>
+  <div class="chips" id="chips">
+    <button class="chip" onclick="setChip('Claudia Sheinbaum')">Claudia Sheinbaum</button>
+    <button class="chip" onclick="setChip('AMLO')">AMLO</button>
+    <button class="chip" onclick="setChip('Xóchitl Gálvez')">Xóchitl Gálvez</button>
+    <button class="chip" onclick="setChip('Santiago Creel')">Santiago Creel</button>
+    <button class="chip" onclick="setChip('Mario Delgado')">Mario Delgado</button>
+    <button class="chip" onclick="setChip('Ricardo Monreal')">Ricardo Monreal</button>
   </div>
+</section>
 
-  <!-- DASHBOARD -->
-  <div id="dashScreen">
-    <!-- HERO -->
-    <div style="border-bottom:1px solid var(--border);background:rgba(13,27,42,0.5)">
-      <div class="wrap" style="padding-top:40px;padding-bottom:28px">
-        <div class="dash-hero-inner">
-          <div>
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:4px;margin-bottom:12px;opacity:.8">// ANÁLISIS INDIVIDUAL</div>
-            <div class="dash-name" id="dashName"></div>
-            <div class="dash-role" id="dashRole"></div>
-            <div class="hero-tags" id="heroTags"></div>
-          </div>
-          <button class="back-btn" onclick="reset()">← NUEVA BÚSQUEDA</button>
-        </div>
-      </div>
-    </div>
+<div class="loading-state" id="loadingState">
+  <div class="loader-ring"></div>
+  <div class="loader-text" id="loaderText">PROCESANDO ANÁLISIS</div>
+  <div class="loader-sub" id="loaderSub">Consultando fuentes · Generando perfil RADAR</div>
+</div>
 
-    <!-- KPIs -->
-    <div style="border-bottom:1px solid var(--border)">
-      <div class="wrap" style="padding:28px 0">
-        <div class="sec-label">INDICADORES CLAVE DEL PERIODO</div>
-        <div class="kpi-grid" id="kpiGrid"></div>
-      </div>
-    </div>
-
-    <!-- TABS -->
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="showTab('vision',this)">VISIÓN GENERAL</button>
-      <button class="tab-btn" onclick="showTab('narrativas',this)">NARRATIVAS</button>
-      <button class="tab-btn" onclick="showTab('cronologia',this)">CRONOLOGÍA</button>
-      <button class="tab-btn" onclick="showTab('riesgos',this)">RIESGOS & OPORTUNIDADES</button>
-      <button class="tab-btn" onclick="showTab('recomendaciones',this)">RECOMENDACIONES</button>
-      <button class="tab-btn" onclick="showTab('conclusion',this)">CONCLUSIÓN</button>
-    </div>
-
-    <div class="wrap tab-content">
-      <!-- VISIÓN GENERAL -->
-      <div class="tab-panel active" id="tab-vision">
-        <div class="chart-grid">
-          <div class="chart-card">
-            <div class="chart-title">Distribución del Sentimiento Digital</div>
-            <div class="chart-sub">Clasificación semántica de la conversación pública</div>
-            <canvas id="chartSent"></canvas>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">Top of Mind — Temas de Conversación</div>
-            <div class="chart-sub">Peso relativo por tema en el periodo analizado</div>
-            <canvas id="chartTemas"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- NARRATIVAS -->
-      <div class="tab-panel" id="tab-narrativas">
-        <div class="sec-label">MAPA NARRATIVO</div>
-        <div class="nar-grid" id="narGrid"></div>
-      </div>
-
-      <!-- CRONOLOGÍA -->
-      <div class="tab-panel" id="tab-cronologia">
-        <div class="sec-label">CRONOLOGÍA DE EVENTOS CLAVE</div>
-        <div class="timeline" id="timeline"></div>
-      </div>
-
-      <!-- RIESGOS -->
-      <div class="tab-panel" id="tab-riesgos">
-        <div class="sec-label">MATRIZ DE RIESGOS Y OPORTUNIDADES</div>
-        <div class="matrix-grid" id="matrixGrid"></div>
-      </div>
-
-      <!-- RECOMENDACIONES -->
-      <div class="tab-panel" id="tab-recomendaciones">
-        <div class="sec-label">RECOMENDACIONES ACCIONABLES</div>
-        <div class="rec-cols" id="recCols"></div>
-      </div>
-
-      <!-- CONCLUSIÓN -->
-      <div class="tab-panel" id="tab-conclusion">
-        <div class="sec-label">DICTAMEN Y CONCLUSIÓN EJECUTIVA FINAL</div>
-        <div class="dictamen-box">
-          <div class="dictamen-lbl">// DICTAMEN RADAR · ABRIL 2026</div>
-          <p class="dictamen-text" id="dictamenText"></p>
-        </div>
-        <div class="verdict-grid" id="verdictGrid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ERROR -->
-  <div class="wrap" id="errorScreen">
+<div class="error-state" id="errorState">
+  <div class="error-box">
     <div class="error-title">ERROR EN EL ANÁLISIS</div>
-    <div class="error-msg" id="errorMsg"></div>
-    <button class="back-btn" onclick="reset()">← INTENTAR DE NUEVO</button>
+    <div class="error-msg" id="errorMsg">Error del servidor</div>
+    <button class="btn-retry" onclick="resetUI()">← INTENTAR DE NUEVO</button>
   </div>
-</main>
+</div>
+
+<div id="dashboard">
+  <!-- Hero -->
+  <div class="hero" id="heroBlock">
+    <div class="hero-tags" id="heroTags"></div>
+    <div class="hero-name" id="heroNombre"></div>
+    <div class="hero-cargo" id="heroCargo"></div>
+    <div class="hero-fecha" id="heroFecha"></div>
+    <div class="clima-badge" id="climaBadge"></div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid" id="kpisGrid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="showTab('vision')">Visión General</button>
+    <button class="tab-btn" onclick="showTab('narrativas')">Narrativas</button>
+    <button class="tab-btn" onclick="showTab('cronologia')">Cronología</button>
+    <button class="tab-btn" onclick="showTab('riesgos')">Riesgos & Oportunidades</button>
+    <button class="tab-btn" onclick="showTab('recomendaciones')">Recomendaciones</button>
+    <button class="tab-btn" onclick="showTab('conclusion')">Conclusión</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-vision">
+    <div class="section-title">Análisis de Sentimiento & Temas</div>
+    <div class="charts-grid">
+      <div class="chart-block">
+        <div class="chart-title">// Distribución de Sentimiento</div>
+        <div id="chartSentimiento"></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-title">// Temas Principales</div>
+        <div id="chartTemas"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-narrativas">
+    <div class="section-title">Mapa de Narrativas</div>
+    <div class="narrativas-grid">
+      <div>
+        <div class="narrativa-col-title fav">▲ Favorables</div>
+        <div id="narrativasFav"></div>
+      </div>
+      <div>
+        <div class="narrativa-col-title cri">▼ Críticas</div>
+        <div id="narrativasCri"></div>
+      </div>
+      <div>
+        <div class="narrativa-col-title neu">◆ Neutras / En disputa</div>
+        <div id="narrativasNeu"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-cronologia">
+    <div class="section-title">Cronología de Eventos</div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-riesgos">
+    <div class="section-title">Matriz de Riesgos & Oportunidades</div>
+    <div class="ro-grid">
+      <div>
+        <div class="chart-title">// Riesgos Identificados</div>
+        <div id="riesgos"></div>
+      </div>
+      <div>
+        <div class="chart-title">// Oportunidades Estratégicas</div>
+        <div id="oportunidades"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-recomendaciones">
+    <div class="section-title">Plan de Acción Estratégico</div>
+    <div class="recs-grid">
+      <div>
+        <div class="chart-title">// Corto Plazo (0-3 meses)</div>
+        <div id="recsCorto"></div>
+      </div>
+      <div>
+        <div class="chart-title">// Mediano Plazo (3-12 meses)</div>
+        <div id="recsMediano"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-conclusion">
+    <div class="section-title">Dictamen Ejecutivo</div>
+    <div class="dictamen-box">
+      <p class="dictamen-text" id="dictamenText"></p>
+    </div>
+    <div class="section-title">Veredictos del Análisis</div>
+    <div class="veredictos-grid" id="veredictos"></div>
+  </div>
+</div>
 
 <footer>
-  <div class="wrap">
-    <div class="footer-text">RADAR · SISTEMA DE INTELIGENCIA POLÍTICO-DIGITAL · MÉXICO · 2026</div>
-  </div>
+  <div class="footer-brand">RADAR · INTELIGENCIA POLÍTICO-DIGITAL</div>
+  <div class="footer-meta">SISTEMA ACTIVO · MÉXICO · 2026</div>
 </footer>
 
 <script>
-let charts={};
+// Cursor
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
 
-function quickSearch(n){document.getElementById('nameInput').value=n;startSearch()}
-document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')startSearch()});
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = (mx - 4) + 'px';
+  cursor.style.top = (my - 4) + 'px';
+});
 
-function setStep(id,state){
-  const labels={s1:'Buscando información pública y reciente',s2:'Analizando narrativas en redes y medios',s3:'Calculando indicadores de posicionamiento',s4:'Generando dictamen estratégico'};
-  const el=document.getElementById(id);
-  const pre=state==='done'?'[✓]':state==='active'?'[→]':'[ ]';
-  el.textContent=pre+' '+labels[id];
-  el.className='step '+(state||'');
+function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) *.12;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// Tab system
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
 }
 
-async function startSearch(){
-  const name=document.getElementById('nameInput').value.trim();
-  if(!name)return;
-  show('loadingScreen');
-  document.getElementById('loadName').textContent=name.toUpperCase();
-  document.getElementById('loadFill').style.width='5%';
-  document.getElementById('loadMsg').textContent='INICIANDO ANÁLISIS...';
-  ['s1','s2','s3','s4'].forEach(s=>setStep(s,''));
-  setStep('s1','active');
+// Chip
+function setChip(nombre) {
+  document.getElementById('nombreInput').value = nombre;
+  analizar();
+}
 
-  const iv=setInterval(()=>{
-    const fill=document.getElementById('loadFill');
-    const cur=parseFloat(fill.style.width)||0;
-    if(cur<85){
-      const next=Math.min(cur+Math.random()*4+1,85);
-      fill.style.width=next+'%';
-      if(next>20){setStep('s1','done');setStep('s2','active');document.getElementById('loadMsg').textContent='ANALIZANDO NARRATIVAS...';}
-      if(next>50){setStep('s2','done');setStep('s3','active');document.getElementById('loadMsg').textContent='CALCULANDO INDICADORES...';}
-      if(next>75){setStep('s3','done');setStep('s4','active');document.getElementById('loadMsg').textContent='GENERANDO DICTAMEN...';}
+// Reset
+function resetUI() {
+  document.getElementById('loadingState').classList.remove('active');
+  document.getElementById('errorState').classList.remove('active');
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('searchSection').style.display = '';
+  document.getElementById('btnAnalizar').disabled = false;
+}
+
+// Loading messages
+const loadingMsgs = [
+  ['RASTREANDO FUENTES', 'Buscando información pública del político...'],
+  ['PROCESANDO NARRATIVAS', 'Analizando ecosistema mediático...'],
+  ['CALCULANDO SENTIMIENTO', 'Modelando conversación digital...'],
+  ['CONSTRUYENDO RADAR', 'Generando perfil estratégico...'],
+];
+let loadInterval;
+
+function startLoading(nombre) {
+  let i = 0;
+  const lt = document.getElementById('loaderText');
+  const ls = document.getElementById('loaderSub');
+  lt.textContent = loadingMsgs[0][0];
+  ls.textContent = loadingMsgs[0][1];
+  loadInterval = setInterval(() => {
+    i = (i + 1) % loadingMsgs.length;
+    lt.textContent = loadingMsgs[i][0];
+    ls.textContent = loadingMsgs[i][1];
+  }, 3500);
+}
+
+function stopLoading() { clearInterval(loadInterval); }
+
+// Main analyze
+async function analizar() {
+  const nombre = document.getElementById('nombreInput').value.trim();
+  const fecha = document.getElementById('fechaSelect').value;
+  if (!nombre) { document.getElementById('nombreInput').focus(); return; }
+
+  document.getElementById('searchSection').style.display = 'none';
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('errorState').classList.remove('active');
+  document.getElementById('loadingState').classList.add('active');
+  document.getElementById('btnAnalizar').disabled = true;
+
+  startLoading(nombre);
+
+  try {
+    const res = await fetch('/api/analizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, fecha })
+    });
+
+    const data = await res.json();
+    stopLoading();
+
+    if (!res.ok || data.error) {
+      document.getElementById('loadingState').classList.remove('active');
+      document.getElementById('errorState').classList.add('active');
+      document.getElementById('errorMsg').textContent = data.error || 'Error desconocido';
+      document.getElementById('btnAnalizar').disabled = false;
+      return;
     }
-  },600);
 
-  try{
-    const resp=await fetch('/api/analizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:name})});
-    clearInterval(iv);
-    if(!resp.ok)throw new Error('Error del servidor: '+resp.status);
-    const data=await resp.json();
-    if(data.error)throw new Error(data.error);
-    setStep('s4','done');
-    document.getElementById('loadFill').style.width='100%';
-    document.getElementById('loadMsg').textContent='ANÁLISIS COMPLETO';
-    await new Promise(r=>setTimeout(r,700));
-    renderDash(data);
-  }catch(err){
-    clearInterval(iv);
-    document.getElementById('errorMsg').textContent=err.message;
-    show('errorScreen');
+    renderDashboard(data);
+
+  } catch (err) {
+    stopLoading();
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('errorState').classList.add('active');
+    document.getElementById('errorMsg').textContent = err.message;
+    document.getElementById('btnAnalizar').disabled = false;
   }
 }
 
-function renderDash(d){
-  show('dashScreen');
+// Render
+function renderDashboard(d) {
+  // Hero
+  document.getElementById('heroNombre').textContent = d.nombre || '';
+  document.getElementById('heroCargo').textContent = d.cargo || '';
+  document.getElementById('heroFecha').textContent = '// ANÁLISIS CORRESPONDIENTE A: ' + (d.fecha_analisis || '').toUpperCase();
 
-  // HERO
-  const words=d.nombre.split(' ');
-  const last=words.pop();
-  document.getElementById('dashName').innerHTML=words.join(' ')+' <span>'+last+'</span>';
-  document.getElementById('dashRole').textContent=d.cargo;
+  const tags = document.getElementById('heroTags');
+  tags.innerHTML = (d.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
 
-  const climaColor=d.clima&&d.clima.includes('ADVERSO')?'htag-gld':'htag-acc';
-  const tags=(d.tags||[]).map(t=>`<span class="htag htag-acc">${t}</span>`).join('');
-  const climaTag=d.clima?`<span class="htag htag-gld">CLIMA: ${d.clima}</span>`:'';
-  document.getElementById('heroTags').innerHTML=tags+climaTag;
+  const clima = d.clima || 'NEUTRO';
+  const climaEl = document.getElementById('climaBadge');
+  const climaKey = clima.replace(/\s+/g, '-').toUpperCase();
+  climaEl.className = 'clima-badge clima-' + climaKey;
+  climaEl.textContent = clima;
 
   // KPIs
-  document.getElementById('kpiGrid').innerHTML=(d.kpis||[]).map(k=>
-    `<div class="kpi-card ${k.tipo}"><div class="kpi-lbl">${k.label}</div><div class="kpi-val">${k.valor}</div><div class="kpi-note">${k.nota}</div></div>`
-  ).join('');
-
-  // NARRATIVAS
-  const narFav=(d.narrativas_favorables||[]).map(n=>`<div class="nar-item" onclick="toggleNar(this)"><div class="nar-title">${n.titulo}</div><div class="nar-desc">${n.descripcion}</div></div>`).join('');
-  const narCrit=(d.narrativas_criticas||[]).map(n=>`<div class="nar-item" onclick="toggleNar(this)"><div class="nar-title">${n.titulo}</div><div class="nar-desc">${n.descripcion}</div></div>`).join('');
-  const narNeu=(d.narrativas_neutras||[]).map(n=>`<div class="nar-item" onclick="toggleNar(this)"><div class="nar-title">${n.titulo}</div><div class="nar-desc">${n.descripcion}</div></div>`).join('');
-  document.getElementById('narGrid').innerHTML=`
-    <div class="nar-col"><div class="nar-head fav">◆ NARRATIVAS FAVORABLES</div>${narFav}</div>
-    <div class="nar-col"><div class="nar-head crit">✕ NARRATIVAS CRÍTICAS</div>${narCrit}</div>
-    <div class="nar-col"><div class="nar-head neu">○ NARRATIVAS EN DISPUTA</div>${narNeu}</div>`;
-
-  // CRONOLOGÍA
-  const tl=document.getElementById('timeline');
-  tl.innerHTML=(d.cronologia||[]).map(e=>`
-    <div class="tl-item">
-      <div class="tl-date">${e.fecha}</div>
-      <div class="tl-dot ${e.tipo}"></div>
-      <div class="tl-content">
-        <span class="tl-badge badge-${e.tipo}">${e.badge}</span>
-        <div class="tl-event">${e.evento}</div>
-        <div class="tl-reading">${e.lectura}</div>
-      </div>
-    </div>`).join('');
-
-  // RIESGOS & OPORTUNIDADES
-  const lvlMap={CRÍTICO:'critico',ALTO:'alto',MEDIO:'medio'};
-  const riesgos=(d.riesgos||[]).map(r=>`
-    <div class="matrix-row">
-      <span class="lvl ${lvlMap[r.nivel]||'medio'}">${r.nivel}</span>
-      <div class="matrix-text"><strong>${r.titulo}</strong><small>${r.descripcion}</small></div>
-    </div>`).join('');
-  const opps=(d.oportunidades||[]).map((o,i)=>`
-    <div class="matrix-row">
-      <span class="lvl ${i<2?'opp-alto':'opp-medio'}">${o.nivel}</span>
-      <div class="matrix-text"><strong>${o.titulo}</strong><small>${o.descripcion}</small></div>
-    </div>`).join('');
-  document.getElementById('matrixGrid').innerHTML=`
-    <div class="matrix-card"><div class="matrix-head risk">⚠ RIESGOS DETECTADOS</div><div class="matrix-body">${riesgos}</div></div>
-    <div class="matrix-card"><div class="matrix-head opp">✦ OPORTUNIDADES DETECTADAS</div><div class="matrix-body">${opps}</div></div>`;
-
-  // RECOMENDACIONES
-  const badgeColor={pos:'badge-pos',neg:'badge-neg',neu:'badge-neu'};
-  const mkRec=list=>(list||[]).map(r=>`
-    <div class="rec-item">
-      <span class="tl-badge ${badgeColor[r.tipo]||'badge-neu'}">${r.badge}</span>
-      <div class="rec-title">${r.titulo}</div>
-      <div class="rec-desc">${r.descripcion}</div>
-    </div>`).join('');
-  document.getElementById('recCols').innerHTML=`
-    <div>
-      <div class="rec-period corto">⚡ CORTO PLAZO · 0-30 DÍAS</div>
-      <div class="rec-list">${mkRec(d.recomendaciones_corto)}</div>
+  const kg = document.getElementById('kpisGrid');
+  kg.innerHTML = (d.kpis || []).map(k => `
+    <div class="kpi-card ${k.tipo || 'acc'}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-valor">${k.valor}</div>
+      <div class="kpi-nota">${k.nota}</div>
     </div>
-    <div>
-      <div class="rec-period mediano">◆ MEDIANO PLAZO · 30-90 DÍAS</div>
-      <div class="rec-list">${mkRec(d.recomendaciones_mediano)}</div>
-    </div>`;
+  `).join('');
 
-  // CONCLUSIÓN
-  document.getElementById('dictamenText').textContent=d.dictamen||'';
-  const vc={suc:{bg:'rgba(46,196,182,0.15)',c:'#2EC4B6'},dan:{bg:'rgba(230,57,70,0.15)',c:'#E63946'},acc:{bg:'rgba(0,194,212,0.1)',c:'#00C2D4'},gld:{bg:'rgba(244,196,48,0.12)',c:'#F4C430'},neu:{bg:'rgba(27,79,138,0.3)',c:'#7eb8f7'},ris:{bg:'rgba(170,0,0,0.2)',c:'#ff7070'}};
-  document.getElementById('verdictGrid').innerHTML=(d.veredictos||[]).map(v=>{
-    const s=vc[v.tipo]||vc.neu;
-    return `<div class="verdict-card"><div class="verdict-head" style="background:${s.bg};color:${s.c}">${v.titulo}</div><div class="verdict-body">${v.cuerpo}</div></div>`;
+  // Sentimiento chart
+  const cs = document.getElementById('chartSentimiento');
+  cs.innerHTML = (d.sentimiento || []).map(s => {
+    const key = s.label.toLowerCase().split('/')[0].trim();
+    return `<div class="bar-row">
+      <div class="bar-label">${s.label}</div>
+      <div class="bar-track"><div class="bar-fill ${key}" style="width:0%" data-pct="${s.pct}%"></div></div>
+      <div class="bar-pct">${s.pct}%</div>
+    </div>`;
   }).join('');
 
-  // RESET TABS
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
-  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+  // Temas chart
+  const ct = document.getElementById('chartTemas');
+  ct.innerHTML = (d.temas || []).map(t => `
+    <div class="bar-row">
+      <div class="bar-label">${t.tema}</div>
+      <div class="bar-track"><div class="bar-fill ${t.color}" style="width:0%" data-pct="${t.pct}%"></div></div>
+      <div class="bar-pct">${t.pct}%</div>
+    </div>
+  `).join('');
 
-  setTimeout(()=>renderCharts(d),150);
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(b => {
+      b.style.width = b.dataset.pct;
+    });
+  }, 100);
+
+  // Narrativas
+  const renderNarrativas = (items, containerId) => {
+    document.getElementById(containerId).innerHTML = (items || []).map(n => `
+      <div class="narrativa-card" onclick="this.classList.toggle('open')">
+        <div class="narrativa-titulo">▶ ${n.titulo}</div>
+        <div class="narrativa-desc">${n.descripcion}</div>
+      </div>
+    `).join('');
+  };
+  renderNarrativas(d.narrativas_favorables, 'narrativasFav');
+  renderNarrativas(d.narrativas_criticas, 'narrativasCri');
+  renderNarrativas(d.narrativas_neutras, 'narrativasNeu');
+
+  // Cronología
+  document.getElementById('timeline').innerHTML = (d.cronologia || []).map(e => `
+    <div class="timeline-item ${e.tipo}">
+      <div class="timeline-dot"></div>
+      <div class="timeline-fecha">${e.fecha}</div>
+      <div class="timeline-badge">${e.badge}</div>
+      <div class="timeline-evento">${e.evento}</div>
+      <div class="timeline-lectura">${e.lectura}</div>
+    </div>
+  `).join('');
+
+  // Riesgos
+  document.getElementById('riesgos').innerHTML = (d.riesgos || []).map(r => `
+    <div class="ro-item ${r.nivel}">
+      <div class="ro-nivel">${r.nivel}</div>
+      <div class="ro-titulo">${r.titulo}</div>
+      <div class="ro-desc">${r.descripcion}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('oportunidades').innerHTML = (d.oportunidades || []).map(o => `
+    <div class="ro-item ${o.nivel}">
+      <div class="ro-nivel">${o.nivel}</div>
+      <div class="ro-titulo">${o.titulo}</div>
+      <div class="ro-desc">${o.descripcion}</div>
+    </div>
+  `).join('');
+
+  // Recomendaciones
+  const renderRecs = (items, containerId) => {
+    document.getElementById(containerId).innerHTML = (items || []).map(r => `
+      <div class="rec-item ${r.tipo}">
+        <div class="rec-badge">${r.badge}</div>
+        <div class="rec-titulo">${r.titulo}</div>
+        <div class="rec-desc">${r.descripcion}</div>
+      </div>
+    `).join('');
+  };
+  renderRecs(d.recomendaciones_corto, 'recsCorto');
+  renderRecs(d.recomendaciones_mediano, 'recsMediano');
+
+  // Conclusión
+  document.getElementById('dictamenText').textContent = d.dictamen || '';
+  document.getElementById('veredictos').innerHTML = (d.veredictos || []).map(v => `
+    <div class="veredicto-card ${v.tipo}">
+      <div class="veredicto-tipo">${v.tipo.toUpperCase()}</div>
+      <div class="veredicto-titulo">${v.titulo}</div>
+      <div class="veredicto-cuerpo">${v.cuerpo}</div>
+    </div>
+  `).join('');
+
+  // Show
+  document.getElementById('loadingState').classList.remove('active');
+  document.getElementById('dashboard').classList.add('active');
+
+  // Reset tabs
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-vision').classList.add('active');
+  document.querySelectorAll('.tab-btn')[0].classList.add('active');
+
+  document.getElementById('btnAnalizar').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function toggleNar(el){el.classList.toggle('open')}
+// Enter key
+document.getElementById('nombreInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') analizar();
+});
 
-function renderCharts(d){
-  Object.values(charts).forEach(c=>c.destroy());charts={};
-  Chart.defaults.color='#8FA3B1';
-  Chart.defaults.font.family="'DM Sans',sans-serif";
-  const C={success:'#2EC4B6',danger:'#E63946',gold:'#F4C430',blue:'#1B4F8A',accent:'#00C2D4',neutral:'#8FA3B1'};
-
-  charts.sent=new Chart(document.getElementById('chartSent'),{
-    type:'doughnut',
-    data:{labels:(d.sentimiento||[]).map(s=>s.label),datasets:[{data:(d.sentimiento||[]).map(s=>s.pct),backgroundColor:[C.success,C.neutral,C.danger,C.gold],borderWidth:0,hoverOffset:8}]},
-    options:{responsive:true,cutout:'62%',plugins:{legend:{position:'bottom',labels:{padding:14,font:{size:11}}},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}%`}}}}
-  });
-
-  const colorMap={success:C.success,danger:C.danger,accent:C.accent,gold:C.gold,neutral:C.neutral};
-  charts.temas=new Chart(document.getElementById('chartTemas'),{
-    type:'bar',
-    data:{labels:(d.temas||[]).map(t=>t.tema),datasets:[{data:(d.temas||[]).map(t=>t.pct),backgroundColor:(d.temas||[]).map(t=>colorMap[t.color]||C.accent),borderRadius:2,borderWidth:0}]},
-    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
-  });
+// Live clock
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('es-MX', { hour12: false });
+  const d = now.toLocaleDateString('es-MX');
 }
-
-function showTab(id,btn){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function show(id){
-  ['searchScreen','loadingScreen','dashScreen','errorScreen'].forEach(s=>{
-    const el=document.getElementById(s);
-    if(el)el.style.display=s===id?'block':'none';
-  });
-}
-
-function reset(){
-  Object.values(charts).forEach(c=>c.destroy());charts={};
-  document.getElementById('nameInput').value='';
-  show('searchScreen');
-}
+setInterval(updateClock, 1000);
 </script>
 </body>
 </html>
